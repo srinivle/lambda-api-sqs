@@ -19,5 +19,7 @@ steps:
     script: |
       terraform init
       terraform validate
+      terraform destroy
       terraform plan
+      terraform apply
     workingDirectory: '/home/ec2-user/sampletf/'
