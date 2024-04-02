@@ -18,8 +18,11 @@ steps:
   inputs:
     script: |
       terraform init
+      terraform fmt
       terraform validate
-      terraform destroy
-      terraform plan
-      terraform apply
+      terraform destroy -auto-approve
+      terraform plan -auto-approve
+      terraform apply -auto-approve
+      sleep 3m
+      terraform destroy -auto-approve
     workingDirectory: '/home/ec2-user/sampletf/'
