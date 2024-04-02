@@ -23,6 +23,6 @@ steps:
       terraform destroy -auto-approve
       terraform plan
       terraform apply -auto-approve
-      sleep 3m
+      sleep 1m
       terraform destroy -auto-approve
     workingDirectory: '/home/ec2-user/sampletf/'
