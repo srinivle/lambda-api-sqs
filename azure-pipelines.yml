@@ -21,7 +21,7 @@ steps:
       terraform fmt
       terraform validate
       terraform destroy -auto-approve
-      terraform plan -auto-approve
+      terraform plan
       terraform apply -auto-approve
       sleep 3m
       terraform destroy -auto-approve
