@@ -1,0 +1,1363 @@
+[ec2-user@ip-172-31-42-124 sampletf]$ vi lambda-api-sqs-pipes.tf
+[ec2-user@ip-172-31-42-124 sampletf]$ terraform init
+
+Initializing the backend...
+
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Using previously-installed hashicorp/aws v5.42.0
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+[ec2-user@ip-172-31-42-124 sampletf]$ terraform validate
+Success! The configuration is valid.
+
+[ec2-user@ip-172-31-42-124 sampletf]$ terraform plan
+data.aws_caller_identity.main: Reading...
+data.aws_iam_policy_document.assume_role: Reading...
+data.aws_iam_policy_document.assume_role: Read complete after 0s [id=2690255455]
+data.aws_caller_identity.main: Read complete after 0s [id=058264069674]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following
+symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_api_gateway_deployment.deploy will be created
+  + resource "aws_api_gateway_deployment" "deploy" {
+      + created_date  = (known after apply)
+      + execution_arn = (known after apply)
+      + id            = (known after apply)
+      + invoke_url    = (known after apply)
+      + rest_api_id   = (known after apply)
+      + triggers      = (known after apply)
+    }
+
+  # aws_api_gateway_integration.integration will be created
+  + resource "aws_api_gateway_integration" "integration" {
+      + cache_namespace         = (known after apply)
+      + connection_type         = "INTERNET"
+      + http_method             = "GET"
+      + id                      = (known after apply)
+      + integration_http_method = "POST"
+      + passthrough_behavior    = (known after apply)
+      + resource_id             = (known after apply)
+      + rest_api_id             = (known after apply)
+      + timeout_milliseconds    = 29000
+      + type                    = "AWS_PROXY"
+      + uri                     = (known after apply)
+    }
+
+  # aws_api_gateway_integration_response.sampleinteg will be created
+  + resource "aws_api_gateway_integration_response" "sampleinteg" {
+      + http_method        = "GET"
+      + id                 = (known after apply)
+      + resource_id        = (known after apply)
+      + response_templates = {
+          + "application/xml" = <<-EOT
+                #set($inputRoot = $input.path('$'))
+                <?xml version="1.0" encoding="UTF-8"?>
+                <message>
+                    $inputRoot.body
+                </message>
+            EOT
+        }
+      + rest_api_id        = (known after apply)
+      + status_code        = "200"
+    }
+
+  # aws_api_gateway_method.method will be created
+  + resource "aws_api_gateway_method" "method" {
+      + api_key_required = false
+      + authorization    = "NONE"
+      + http_method      = "GET"
+      + id               = (known after apply)
+      + resource_id      = (known after apply)
+      + rest_api_id      = (known after apply)
+    }
+
+  # aws_api_gateway_method_response.response_200 will be created
+  + resource "aws_api_gateway_method_response" "response_200" {
+      + http_method = "GET"
+      + id          = (known after apply)
+      + resource_id = (known after apply)
+      + rest_api_id = (known after apply)
+      + status_code = "200"
+    }
+
+  # aws_api_gateway_resource.resource will be created
+  + resource "aws_api_gateway_resource" "resource" {
+      + id          = (known after apply)
+      + parent_id   = (known after apply)
+      + path        = (known after apply)
+      + path_part   = "resource"
+      + rest_api_id = (known after apply)
+    }
+
+  # aws_api_gateway_rest_api.api will be created
+  + resource "aws_api_gateway_rest_api" "api" {
+      + api_key_source               = (known after apply)
+      + arn                          = (known after apply)
+      + binary_media_types           = (known after apply)
+      + created_date                 = (known after apply)
+      + description                  = (known after apply)
+      + disable_execute_api_endpoint = (known after apply)
+      + execution_arn                = (known after apply)
+      + id                           = (known after apply)
+      + minimum_compression_size     = (known after apply)
+      + name                         = "myDemoApi"
+      + policy                       = (known after apply)
+      + root_resource_id             = (known after apply)
+      + tags_all                     = (known after apply)
+    }
+
+  # aws_api_gateway_stage.dev will be created
+  + resource "aws_api_gateway_stage" "dev" {
+      + arn           = (known after apply)
+      + deployment_id = (known after apply)
+      + execution_arn = (known after apply)
+      + id            = (known after apply)
+      + invoke_url    = (known after apply)
+      + rest_api_id   = (known after apply)
+      + stage_name    = "dev"
+      + tags_all      = (known after apply)
+      + web_acl_arn   = (known after apply)
+    }
+
+  # aws_cloudwatch_event_api_destination.example_pipes2 will be created
+  + resource "aws_cloudwatch_event_api_destination" "example_pipes2" {
+      + arn                              = (known after apply)
+      + connection_arn                   = (known after apply)
+      + description                      = "An API Destination"
+      + http_method                      = "POST"
+      + id                               = (known after apply)
+      + invocation_endpoint              = (known after apply)
+      + invocation_rate_limit_per_second = 20
+      + name                             = "example-api-destination"
+    }
+
+  # aws_cloudwatch_event_connection.example_pipes1 will be created
+  + resource "aws_cloudwatch_event_connection" "example_pipes1" {
+      + arn                = (known after apply)
+      + authorization_type = "BASIC"
+      + description        = "A connection description"
+      + id                 = (known after apply)
+      + name               = "example-connection"
+      + secret_arn         = (known after apply)
+
+      + auth_parameters {
+          + basic {
+              + password = (sensitive value)
+              + username = "demouser"
+            }
+        }
+    }
+
+  # aws_iam_role.example_pipes3 will be created
+  + resource "aws_iam_role" "example_pipes3" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = {
+                  + Action    = "sts:AssumeRole"
+                  + Condition = {
+                      + StringEquals = {
+                          + "aws:SourceAccount" = "058264069674"
+                        }
+                    }
+                  + Effect    = "Allow"
+                  + Principal = {
+                      + Service = "pipes.amazonaws.com"
+                    }
+                }
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = (known after apply)
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+    }
+
+  # aws_iam_role.role will be created
+  + resource "aws_iam_role" "role" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "myDemoRole"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+    }
+
+  # aws_iam_role_policy.source will be created
+  + resource "aws_iam_role_policy" "source" {
+      + id          = (known after apply)
+      + name        = (known after apply)
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.target will be created
+  + resource "aws_iam_role_policy" "target" {
+      + id          = (known after apply)
+      + name        = (known after apply)
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_lambda_function.sampleone will be created
+  + resource "aws_lambda_function" "sampleone" {
+      + architectures                  = (known after apply)
+      + arn                            = (known after apply)
+      + function_name                  = "mylambda123"
+      + handler                        = "lambda.lambda_handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 128
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "python3.12"
+      + s3_bucket                      = "sample88563"
+      + s3_key                         = "sample.zip"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + skip_destroy                   = false
+      + source_code_hash               = (known after apply)
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 3
+      + version                        = (known after apply)
+    }
+
+  # aws_lambda_function_url.sampleone1 will be created
+  + resource "aws_lambda_function_url" "sampleone1" {
+      + authorization_type = "NONE"
+      + function_arn       = (known after apply)
+      + function_name      = "mylambda123"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + invoke_mode        = "BUFFERED"
+      + url_id             = (known after apply)
+    }
+
+  # aws_lambda_permission.apigw_lambda will be created
+  + resource "aws_lambda_permission" "apigw_lambda" {
+      + action              = "lambda:InvokeFunction"
+      + function_name       = "mylambda123"
+      + id                  = (known after apply)
+      + principal           = "apigateway.amazonaws.com"
+      + source_arn          = (known after apply)
+      + statement_id        = "AllowExecutionFromAPIGateway"
+      + statement_id_prefix = (known after apply)
+    }
+
+  # aws_pipes_pipe.example_pipes4 will be created
+  + resource "aws_pipes_pipe" "example_pipes4" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + id            = (known after apply)
+      + name          = "example-pipe"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+    }
+
+  # aws_pipes_pipe.example_pipes5 will be created
+  + resource "aws_pipes_pipe" "example_pipes5" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + enrichment    = (known after apply)
+      + id            = (known after apply)
+      + name          = "example-pipe5"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+
+      + enrichment_parameters {
+          + http_parameters {
+              + header_parameters       = {
+                  + "example-header"        = "example-value"
+                  + "second-example-header" = "second-example-value"
+                }
+              + path_parameter_values   = (known after apply)
+              + query_string_parameters = {
+                  + "example-query-string"        = "example-value"
+                  + "second-example-query-string" = "second-example-value"
+                }
+            }
+        }
+    }
+
+  # aws_pipes_pipe.example_pipes6 will be created
+  + resource "aws_pipes_pipe" "example_pipes6" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + id            = (known after apply)
+      + name          = "example-pipe6"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+
+      + source_parameters {
+          + filter_criteria {
+              + filter {
+                  + pattern = jsonencode(
+                        {
+                          + source = [
+                              + "event-source",
+                            ]
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+  # aws_pipes_pipe.example_pipes7 will be created
+  + resource "aws_pipes_pipe" "example_pipes7" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + id            = (known after apply)
+      + name          = "example-pipe7"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+
+      + source_parameters {
+          + sqs_queue_parameters {
+              + batch_size                         = 1
+              + maximum_batching_window_in_seconds = 2
+            }
+        }
+    }
+
+  # aws_sqs_queue.sample_queue will be created
+  + resource "aws_sqs_queue" "sample_queue" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 90
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 2048
+      + message_retention_seconds         = 86400
+      + name                              = "sample-queue"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 10
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags                              = {
+          + "Environment" = "dev"
+        }
+      + tags_all                          = {
+          + "Environment" = "dev"
+        }
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue2 will be created
+  + resource "aws_sqs_queue" "sample_queue2" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = "messageGroup"
+      + delay_seconds                     = 0
+      + fifo_queue                        = true
+      + fifo_throughput_limit             = "perMessageGroupId"
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue.fifo"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue3 will be created
+  + resource "aws_sqs_queue" "sample_queue3" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue3"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue4 will be created
+  + resource "aws_sqs_queue" "sample_queue4" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue4"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = true
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue_deadletter will be created
+  + resource "aws_sqs_queue" "sample_queue_deadletter" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue-deadletter-queue"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.source will be created
+  + resource "aws_sqs_queue" "source" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = (known after apply)
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.target will be created
+  + resource "aws_sqs_queue" "target" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = (known after apply)
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue_redrive_allow_policy.sample_queue_redrive_allow_policy will be created
+  + resource "aws_sqs_queue_redrive_allow_policy" "sample_queue_redrive_allow_policy" {
+      + id                   = (known after apply)
+      + queue_url            = (known after apply)
+      + redrive_allow_policy = (known after apply)
+    }
+
+Plan: 29 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + api_gateway_deploy          = (known after apply)
+  + api_gateway_endpoint        = (known after apply)
+  + api_gateway_id              = (known after apply)
+  + api_gateway_resource        = (known after apply)
+  + api_gateway_resourcepath    = (known after apply)
+  + api_gateway_resourcerestapi = (known after apply)
+  + aws_sample_q1               = (known after apply)
+  + aws_sample_q2               = (known after apply)
+  + aws_sample_q21              = (known after apply)
+  + aws_sample_q22              = (known after apply)
+  + aws_sample_q31              = (known after apply)
+  + aws_sample_q32              = (known after apply)
+  + aws_sample_q41              = (known after apply)
+  + aws_sample_q42              = (known after apply)
+  + aws_sample_q80              = (known after apply)
+  + aws_sample_q81              = (known after apply)
+  + aws_sample_q82              = (known after apply)
+  + aws_sample_q83              = (known after apply)
+  + aws_sample_q84              = (known after apply)
+  + cloudwatch_api_destination  = (known after apply)
+  + lambda_function01           = (known after apply)
+  + lambda_function_url         = (known after apply)
+  + lambda_function_urlid       = (known after apply)
+  + lambda_perm                 = (known after apply)
+  + pipe4id                     = (known after apply)
+  + pipe5id                     = (known after apply)
+  + pipe6id                     = (known after apply)
+  + pipe7id1                    = (known after apply)
+  + pipe7id2                    = [
+      + {
+          + activemq_broker_parameters         = (known after apply)
+          + dynamodb_stream_parameters         = (known after apply)
+          + filter_criteria                    = []
+          + kinesis_stream_parameters          = (known after apply)
+          + managed_streaming_kafka_parameters = (known after apply)
+          + rabbitmq_broker_parameters         = (known after apply)
+          + self_managed_kafka_parameters      = (known after apply)
+          + sqs_queue_parameters               = [
+              + {
+                  + batch_size                         = 1
+                  + maximum_batching_window_in_seconds = 2
+                },
+            ]
+        },
+    ]
+  + pipe7id3                    = (known after apply)
+  + pipe7id4                    = (known after apply)
+  + sqs_redrive_allowpolicy     = (known after apply)
+  + sqs_redrive_allowpolicyqurl = (known after apply)
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't guarantee to take exactly these actions if you run
+"terraform apply" now.
+[ec2-user@ip-172-31-42-124 sampletf]$ terraform apply
+data.aws_iam_policy_document.assume_role: Reading...
+data.aws_caller_identity.main: Reading...
+data.aws_iam_policy_document.assume_role: Read complete after 0s [id=2690255455]
+data.aws_caller_identity.main: Read complete after 1s [id=058264069674]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following
+symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_api_gateway_deployment.deploy will be created
+  + resource "aws_api_gateway_deployment" "deploy" {
+      + created_date  = (known after apply)
+      + execution_arn = (known after apply)
+      + id            = (known after apply)
+      + invoke_url    = (known after apply)
+      + rest_api_id   = (known after apply)
+      + triggers      = (known after apply)
+    }
+
+  # aws_api_gateway_integration.integration will be created
+  + resource "aws_api_gateway_integration" "integration" {
+      + cache_namespace         = (known after apply)
+      + connection_type         = "INTERNET"
+      + http_method             = "GET"
+      + id                      = (known after apply)
+      + integration_http_method = "POST"
+      + passthrough_behavior    = (known after apply)
+      + resource_id             = (known after apply)
+      + rest_api_id             = (known after apply)
+      + timeout_milliseconds    = 29000
+      + type                    = "AWS_PROXY"
+      + uri                     = (known after apply)
+    }
+
+  # aws_api_gateway_integration_response.sampleinteg will be created
+  + resource "aws_api_gateway_integration_response" "sampleinteg" {
+      + http_method        = "GET"
+      + id                 = (known after apply)
+      + resource_id        = (known after apply)
+      + response_templates = {
+          + "application/xml" = <<-EOT
+                #set($inputRoot = $input.path('$'))
+                <?xml version="1.0" encoding="UTF-8"?>
+                <message>
+                    $inputRoot.body
+                </message>
+            EOT
+        }
+      + rest_api_id        = (known after apply)
+      + status_code        = "200"
+    }
+
+  # aws_api_gateway_method.method will be created
+  + resource "aws_api_gateway_method" "method" {
+      + api_key_required = false
+      + authorization    = "NONE"
+      + http_method      = "GET"
+      + id               = (known after apply)
+      + resource_id      = (known after apply)
+      + rest_api_id      = (known after apply)
+    }
+
+  # aws_api_gateway_method_response.response_200 will be created
+  + resource "aws_api_gateway_method_response" "response_200" {
+      + http_method = "GET"
+      + id          = (known after apply)
+      + resource_id = (known after apply)
+      + rest_api_id = (known after apply)
+      + status_code = "200"
+    }
+
+  # aws_api_gateway_resource.resource will be created
+  + resource "aws_api_gateway_resource" "resource" {
+      + id          = (known after apply)
+      + parent_id   = (known after apply)
+      + path        = (known after apply)
+      + path_part   = "resource"
+      + rest_api_id = (known after apply)
+    }
+
+  # aws_api_gateway_rest_api.api will be created
+  + resource "aws_api_gateway_rest_api" "api" {
+      + api_key_source               = (known after apply)
+      + arn                          = (known after apply)
+      + binary_media_types           = (known after apply)
+      + created_date                 = (known after apply)
+      + description                  = (known after apply)
+      + disable_execute_api_endpoint = (known after apply)
+      + execution_arn                = (known after apply)
+      + id                           = (known after apply)
+      + minimum_compression_size     = (known after apply)
+      + name                         = "myDemoApi"
+      + policy                       = (known after apply)
+      + root_resource_id             = (known after apply)
+      + tags_all                     = (known after apply)
+    }
+
+  # aws_api_gateway_stage.dev will be created
+  + resource "aws_api_gateway_stage" "dev" {
+      + arn           = (known after apply)
+      + deployment_id = (known after apply)
+      + execution_arn = (known after apply)
+      + id            = (known after apply)
+      + invoke_url    = (known after apply)
+      + rest_api_id   = (known after apply)
+      + stage_name    = "dev"
+      + tags_all      = (known after apply)
+      + web_acl_arn   = (known after apply)
+    }
+
+  # aws_cloudwatch_event_api_destination.example_pipes2 will be created
+  + resource "aws_cloudwatch_event_api_destination" "example_pipes2" {
+      + arn                              = (known after apply)
+      + connection_arn                   = (known after apply)
+      + description                      = "An API Destination"
+      + http_method                      = "POST"
+      + id                               = (known after apply)
+      + invocation_endpoint              = (known after apply)
+      + invocation_rate_limit_per_second = 20
+      + name                             = "example-api-destination"
+    }
+
+  # aws_cloudwatch_event_connection.example_pipes1 will be created
+  + resource "aws_cloudwatch_event_connection" "example_pipes1" {
+      + arn                = (known after apply)
+      + authorization_type = "BASIC"
+      + description        = "A connection description"
+      + id                 = (known after apply)
+      + name               = "example-connection"
+      + secret_arn         = (known after apply)
+
+      + auth_parameters {
+          + basic {
+              + password = (sensitive value)
+              + username = "demouser"
+            }
+        }
+    }
+
+  # aws_iam_role.example_pipes3 will be created
+  + resource "aws_iam_role" "example_pipes3" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = {
+                  + Action    = "sts:AssumeRole"
+                  + Condition = {
+                      + StringEquals = {
+                          + "aws:SourceAccount" = "058264069674"
+                        }
+                    }
+                  + Effect    = "Allow"
+                  + Principal = {
+                      + Service = "pipes.amazonaws.com"
+                    }
+                }
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = (known after apply)
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+    }
+
+  # aws_iam_role.role will be created
+  + resource "aws_iam_role" "role" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "myDemoRole"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+    }
+
+  # aws_iam_role_policy.source will be created
+  + resource "aws_iam_role_policy" "source" {
+      + id          = (known after apply)
+      + name        = (known after apply)
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.target will be created
+  + resource "aws_iam_role_policy" "target" {
+      + id          = (known after apply)
+      + name        = (known after apply)
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_lambda_function.sampleone will be created
+  + resource "aws_lambda_function" "sampleone" {
+      + architectures                  = (known after apply)
+      + arn                            = (known after apply)
+      + function_name                  = "mylambda123"
+      + handler                        = "lambda.lambda_handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 128
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "python3.12"
+      + s3_bucket                      = "sample88563"
+      + s3_key                         = "sample.zip"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + skip_destroy                   = false
+      + source_code_hash               = (known after apply)
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 3
+      + version                        = (known after apply)
+    }
+
+  # aws_lambda_function_url.sampleone1 will be created
+  + resource "aws_lambda_function_url" "sampleone1" {
+      + authorization_type = "NONE"
+      + function_arn       = (known after apply)
+      + function_name      = "mylambda123"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + invoke_mode        = "BUFFERED"
+      + url_id             = (known after apply)
+    }
+
+  # aws_lambda_permission.apigw_lambda will be created
+  + resource "aws_lambda_permission" "apigw_lambda" {
+      + action              = "lambda:InvokeFunction"
+      + function_name       = "mylambda123"
+      + id                  = (known after apply)
+      + principal           = "apigateway.amazonaws.com"
+      + source_arn          = (known after apply)
+      + statement_id        = "AllowExecutionFromAPIGateway"
+      + statement_id_prefix = (known after apply)
+    }
+
+  # aws_pipes_pipe.example_pipes4 will be created
+  + resource "aws_pipes_pipe" "example_pipes4" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + id            = (known after apply)
+      + name          = "example-pipe"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+    }
+
+  # aws_pipes_pipe.example_pipes5 will be created
+  + resource "aws_pipes_pipe" "example_pipes5" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + enrichment    = (known after apply)
+      + id            = (known after apply)
+      + name          = "example-pipe5"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+
+      + enrichment_parameters {
+          + http_parameters {
+              + header_parameters       = {
+                  + "example-header"        = "example-value"
+                  + "second-example-header" = "second-example-value"
+                }
+              + path_parameter_values   = (known after apply)
+              + query_string_parameters = {
+                  + "example-query-string"        = "example-value"
+                  + "second-example-query-string" = "second-example-value"
+                }
+            }
+        }
+    }
+
+  # aws_pipes_pipe.example_pipes6 will be created
+  + resource "aws_pipes_pipe" "example_pipes6" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + id            = (known after apply)
+      + name          = "example-pipe6"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+
+      + source_parameters {
+          + filter_criteria {
+              + filter {
+                  + pattern = jsonencode(
+                        {
+                          + source = [
+                              + "event-source",
+                            ]
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+  # aws_pipes_pipe.example_pipes7 will be created
+  + resource "aws_pipes_pipe" "example_pipes7" {
+      + arn           = (known after apply)
+      + description   = "Managed by Terraform"
+      + desired_state = "RUNNING"
+      + id            = (known after apply)
+      + name          = "example-pipe7"
+      + name_prefix   = (known after apply)
+      + role_arn      = (known after apply)
+      + source        = (known after apply)
+      + tags_all      = (known after apply)
+      + target        = (known after apply)
+
+      + source_parameters {
+          + sqs_queue_parameters {
+              + batch_size                         = 1
+              + maximum_batching_window_in_seconds = 2
+            }
+        }
+    }
+
+  # aws_sqs_queue.sample_queue will be created
+  + resource "aws_sqs_queue" "sample_queue" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 90
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 2048
+      + message_retention_seconds         = 86400
+      + name                              = "sample-queue"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 10
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags                              = {
+          + "Environment" = "dev"
+        }
+      + tags_all                          = {
+          + "Environment" = "dev"
+        }
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue2 will be created
+  + resource "aws_sqs_queue" "sample_queue2" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = "messageGroup"
+      + delay_seconds                     = 0
+      + fifo_queue                        = true
+      + fifo_throughput_limit             = "perMessageGroupId"
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue.fifo"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue3 will be created
+  + resource "aws_sqs_queue" "sample_queue3" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue3"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue4 will be created
+  + resource "aws_sqs_queue" "sample_queue4" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue4"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = true
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.sample_queue_deadletter will be created
+  + resource "aws_sqs_queue" "sample_queue_deadletter" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = "sample-queue-deadletter-queue"
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.source will be created
+  + resource "aws_sqs_queue" "source" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = (known after apply)
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue.target will be created
+  + resource "aws_sqs_queue" "target" {
+      + arn                               = (known after apply)
+      + content_based_deduplication       = false
+      + deduplication_scope               = (known after apply)
+      + delay_seconds                     = 0
+      + fifo_queue                        = false
+      + fifo_throughput_limit             = (known after apply)
+      + id                                = (known after apply)
+      + kms_data_key_reuse_period_seconds = (known after apply)
+      + max_message_size                  = 262144
+      + message_retention_seconds         = 345600
+      + name                              = (known after apply)
+      + name_prefix                       = (known after apply)
+      + policy                            = (known after apply)
+      + receive_wait_time_seconds         = 0
+      + redrive_allow_policy              = (known after apply)
+      + redrive_policy                    = (known after apply)
+      + sqs_managed_sse_enabled           = (known after apply)
+      + tags_all                          = (known after apply)
+      + url                               = (known after apply)
+      + visibility_timeout_seconds        = 30
+    }
+
+  # aws_sqs_queue_redrive_allow_policy.sample_queue_redrive_allow_policy will be created
+  + resource "aws_sqs_queue_redrive_allow_policy" "sample_queue_redrive_allow_policy" {
+      + id                   = (known after apply)
+      + queue_url            = (known after apply)
+      + redrive_allow_policy = (known after apply)
+    }
+
+Plan: 29 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + api_gateway_deploy          = (known after apply)
+  + api_gateway_endpoint        = (known after apply)
+  + api_gateway_id              = (known after apply)
+  + api_gateway_resource        = (known after apply)
+  + api_gateway_resourcepath    = (known after apply)
+  + api_gateway_resourcerestapi = (known after apply)
+  + aws_sample_q1               = (known after apply)
+  + aws_sample_q2               = (known after apply)
+  + aws_sample_q21              = (known after apply)
+  + aws_sample_q22              = (known after apply)
+  + aws_sample_q31              = (known after apply)
+  + aws_sample_q32              = (known after apply)
+  + aws_sample_q41              = (known after apply)
+  + aws_sample_q42              = (known after apply)
+  + aws_sample_q80              = (known after apply)
+  + aws_sample_q81              = (known after apply)
+  + aws_sample_q82              = (known after apply)
+  + aws_sample_q83              = (known after apply)
+  + aws_sample_q84              = (known after apply)
+  + cloudwatch_api_destination  = (known after apply)
+  + lambda_function01           = (known after apply)
+  + lambda_function_url         = (known after apply)
+  + lambda_function_urlid       = (known after apply)
+  + lambda_perm                 = (known after apply)
+  + pipe4id                     = (known after apply)
+  + pipe5id                     = (known after apply)
+  + pipe6id                     = (known after apply)
+  + pipe7id1                    = (known after apply)
+  + pipe7id2                    = [
+      + {
+          + activemq_broker_parameters         = (known after apply)
+          + dynamodb_stream_parameters         = (known after apply)
+          + filter_criteria                    = []
+          + kinesis_stream_parameters          = (known after apply)
+          + managed_streaming_kafka_parameters = (known after apply)
+          + rabbitmq_broker_parameters         = (known after apply)
+          + self_managed_kafka_parameters      = (known after apply)
+          + sqs_queue_parameters               = [
+              + {
+                  + batch_size                         = 1
+                  + maximum_batching_window_in_seconds = 2
+                },
+            ]
+        },
+    ]
+  + pipe7id3                    = (known after apply)
+  + pipe7id4                    = (known after apply)
+  + sqs_redrive_allowpolicy     = (known after apply)
+  + sqs_redrive_allowpolicyqurl = (known after apply)
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+aws_sqs_queue.sample_queue_deadletter: Creating...
+aws_api_gateway_rest_api.api: Creating...
+aws_sqs_queue.target: Creating...
+aws_cloudwatch_event_connection.example_pipes1: Creating...
+aws_sqs_queue.source: Creating...
+aws_iam_role.role: Creating...
+aws_iam_role.example_pipes3: Creating...
+aws_iam_role.role: Creation complete after 0s [id=myDemoRole]
+aws_lambda_function.sampleone: Creating...
+aws_iam_role.example_pipes3: Creation complete after 0s [id=terraform-20240326131814141600000004]
+aws_cloudwatch_event_connection.example_pipes1: Creation complete after 1s [id=example-connection]
+aws_api_gateway_rest_api.api: Creation complete after 1s [id=o9cgfl3y98]
+aws_api_gateway_resource.resource: Creating...
+aws_api_gateway_resource.resource: Creation complete after 0s [id=5ik8ia]
+aws_api_gateway_method.method: Creating...
+aws_api_gateway_method.method: Creation complete after 0s [id=agm-o9cgfl3y98-5ik8ia-GET]
+aws_sqs_queue.sample_queue_deadletter: Still creating... [10s elapsed]
+aws_sqs_queue.target: Still creating... [10s elapsed]
+aws_sqs_queue.source: Still creating... [10s elapsed]
+aws_lambda_function.sampleone: Still creating... [10s elapsed]
+aws_lambda_function.sampleone: Creation complete after 14s [id=mylambda123]
+aws_lambda_function_url.sampleone1: Creating...
+aws_api_gateway_integration.integration: Creating...
+aws_lambda_permission.apigw_lambda: Creating...
+aws_lambda_permission.apigw_lambda: Creation complete after 0s [id=AllowExecutionFromAPIGateway]
+aws_api_gateway_integration.integration: Creation complete after 0s [id=agi-o9cgfl3y98-5ik8ia-GET]
+aws_api_gateway_method_response.response_200: Creating...
+aws_api_gateway_deployment.deploy: Creating...
+aws_api_gateway_method_response.response_200: Creation complete after 0s [id=agmr-o9cgfl3y98-5ik8ia-GET-200]
+aws_api_gateway_integration_response.sampleinteg: Creating...
+aws_api_gateway_integration_response.sampleinteg: Creation complete after 0s [id=agir-o9cgfl3y98-5ik8ia-GET-200]
+aws_lambda_function_url.sampleone1: Creation complete after 0s [id=mylambda123]
+aws_api_gateway_deployment.deploy: Creation complete after 0s [id=w2qwv7]
+aws_api_gateway_stage.dev: Creating...
+aws_cloudwatch_event_api_destination.example_pipes2: Creating...
+aws_cloudwatch_event_api_destination.example_pipes2: Creation complete after 1s [id=example-api-destination]
+aws_api_gateway_stage.dev: Creation complete after 1s [id=ags-o9cgfl3y98-dev]
+aws_sqs_queue.sample_queue_deadletter: Still creating... [20s elapsed]
+aws_sqs_queue.target: Still creating... [20s elapsed]
+aws_sqs_queue.source: Still creating... [20s elapsed]
+aws_sqs_queue.source: Creation complete after 25s [id=https://sqs.us-east-1.amazonaws.com/058264069674/terraform-20240326131814142900000005]
+aws_sqs_queue.target: Creation complete after 25s [id=https://sqs.us-east-1.amazonaws.com/058264069674/terraform-20240326131814138600000003]
+aws_iam_role_policy.source: Creating...
+aws_sqs_queue.sample_queue_deadletter: Creation complete after 25s [id=https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue-deadletter-queue]
+aws_iam_role_policy.target: Creating...
+aws_sqs_queue.sample_queue: Creating...
+aws_iam_role_policy.source: Creation complete after 0s [id=terraform-20240326131814141600000004:terraform-20240326131839291600000006]
+aws_iam_role_policy.target: Creation complete after 0s [id=terraform-20240326131814141600000004:terraform-20240326131839300600000007]
+aws_pipes_pipe.example_pipes4: Creating...
+aws_sqs_queue.sample_queue: Still creating... [10s elapsed]
+aws_pipes_pipe.example_pipes4: Still creating... [10s elapsed]
+aws_sqs_queue.sample_queue: Still creating... [20s elapsed]
+aws_pipes_pipe.example_pipes4: Still creating... [20s elapsed]
+aws_sqs_queue.sample_queue: Creation complete after 25s [id=https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue]
+aws_sqs_queue.sample_queue2: Creating...
+aws_pipes_pipe.example_pipes4: Still creating... [30s elapsed]
+aws_pipes_pipe.example_pipes4: Creation complete after 34s [id=example-pipe]
+aws_pipes_pipe.example_pipes5: Creating...
+aws_sqs_queue.sample_queue2: Still creating... [10s elapsed]
+aws_pipes_pipe.example_pipes5: Still creating... [10s elapsed]
+aws_sqs_queue.sample_queue2: Still creating... [20s elapsed]
+aws_pipes_pipe.example_pipes5: Creation complete after 13s [id=example-pipe5]
+aws_pipes_pipe.example_pipes6: Creating...
+aws_sqs_queue.sample_queue2: Creation complete after 26s [id=https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue.fifo]
+aws_sqs_queue.sample_queue3: Creating...
+aws_pipes_pipe.example_pipes6: Still creating... [10s elapsed]
+aws_sqs_queue.sample_queue3: Still creating... [10s elapsed]
+aws_pipes_pipe.example_pipes6: Still creating... [20s elapsed]
+aws_pipes_pipe.example_pipes6: Creation complete after 23s [id=example-pipe6]
+aws_pipes_pipe.example_pipes7: Creating...
+aws_sqs_queue.sample_queue3: Still creating... [20s elapsed]
+aws_sqs_queue.sample_queue3: Creation complete after 25s [id=https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue3]
+aws_sqs_queue.sample_queue4: Creating...
+aws_sqs_queue_redrive_allow_policy.sample_queue_redrive_allow_policy: Creating...
+aws_pipes_pipe.example_pipes7: Still creating... [10s elapsed]
+aws_sqs_queue.sample_queue4: Still creating... [10s elapsed]
+aws_sqs_queue_redrive_allow_policy.sample_queue_redrive_allow_policy: Still creating... [10s elapsed]
+aws_pipes_pipe.example_pipes7: Still creating... [20s elapsed]
+aws_pipes_pipe.example_pipes7: Creation complete after 23s [id=example-pipe7]
+aws_sqs_queue.sample_queue4: Still creating... [20s elapsed]
+aws_sqs_queue_redrive_allow_policy.sample_queue_redrive_allow_policy: Still creating... [20s elapsed]
+aws_sqs_queue_redrive_allow_policy.sample_queue_redrive_allow_policy: Creation complete after 25s [id=https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue-deadletter-queue]
+aws_sqs_queue.sample_queue4: Creation complete after 25s [id=https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue4]
+
+Apply complete! Resources: 29 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+api_gateway_deploy = "w2qwv7"
+api_gateway_endpoint = false
+api_gateway_id = "o9cgfl3y98"
+api_gateway_resource = "5ik8ia"
+api_gateway_resourcepath = "/resource"
+api_gateway_resourcerestapi = "o9cgfl3y98"
+aws_sample_q1 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue"
+aws_sample_q2 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue"
+aws_sample_q21 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue.fifo"
+aws_sample_q22 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue.fifo"
+aws_sample_q31 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue3"
+aws_sample_q32 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue3"
+aws_sample_q41 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue4"
+aws_sample_q42 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue4"
+aws_sample_q80 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue-deadletter-queue"
+aws_sample_q81 = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue-deadletter-queue"
+aws_sample_q82 = ""
+aws_sample_q83 = ""
+aws_sample_q84 = ""
+cloudwatch_api_destination = "example-api-destination"
+lambda_function01 = "mylambda123"
+lambda_function_url = "https://vw67eetfxral6dpdxtitvlm44u0lmmdc.lambda-url.us-east-1.on.aws/"
+lambda_function_urlid = "vw67eetfxral6dpdxtitvlm44u0lmmdc"
+lambda_perm = "AllowExecutionFromAPIGateway"
+pipe4id = "example-pipe"
+pipe5id = "example-pipe5"
+pipe6id = "example-pipe6"
+pipe7id1 = "example-pipe7"
+pipe7id2 = tolist([
+  {
+    "activemq_broker_parameters" = tolist([])
+    "dynamodb_stream_parameters" = tolist([])
+    "filter_criteria" = tolist([])
+    "kinesis_stream_parameters" = tolist([])
+    "managed_streaming_kafka_parameters" = tolist([])
+    "rabbitmq_broker_parameters" = tolist([])
+    "self_managed_kafka_parameters" = tolist([])
+    "sqs_queue_parameters" = tolist([
+      {
+        "batch_size" = 1
+        "maximum_batching_window_in_seconds" = 2
+      },
+    ])
+  },
+])
+pipe7id3 = "arn:aws:sqs:us-east-1:058264069674:terraform-20240326131814142900000005"
+pipe7id4 = "arn:aws:sqs:us-east-1:058264069674:terraform-20240326131814138600000003"
+sqs_redrive_allowpolicy = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue-deadletter-queue"
+sqs_redrive_allowpolicyqurl = "https://sqs.us-east-1.amazonaws.com/058264069674/sample-queue-deadletter-queue"
+[ec2-user@ip-172-31-42-124 sampletf]$
