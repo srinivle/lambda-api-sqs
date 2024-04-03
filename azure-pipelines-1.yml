@@ -27,4 +27,10 @@ steps:
     inlineScript: |
       # You can write your script inline here
       terraform init
+      terraform fmt
       terraform validate
+      terraform destroy -auto-approve
+      terraform plan
+      terraform apply -auto-approve
+      sleep 1m
+      terraform destroy -auto-approve 
