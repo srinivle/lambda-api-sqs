@@ -34,4 +34,4 @@ steps:
       sleep 1m
       terraform destroy -auto-approve
       sleep 1m
-      print("Hello there, You've successfully executed the Job. Congrats!!!")
+      echo "Hello there, You've successfully executed the Job. Congrats!!!"
