@@ -1,0 +1,28 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  name: Default
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+
+- task: CmdLine@2
+  inputs:
+    script: |
+      terraform init
+      terraform fmt
+      terraform validate
+      terraform destroy -auto-approve
+      terraform plan
+      terraform apply -auto-approve
+      sleep 1m
+      terraform destroy -auto-approve
+    workingDirectory: '/home/ec2-user/sampletf/'
